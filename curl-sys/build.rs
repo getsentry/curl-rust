@@ -244,6 +244,18 @@ fn main() {
         .define("HAVE_GETSOCKNAME", None)
         .warnings(false);
 
+    if cfg!(feature = "cares") {
+        cfg.define("USE_ARES", None)
+            .define("CARES_STATICLIB", None)
+            .file("curl/lib/asyn-ares.c");
+        println!("cargo:rustc-link-lib=cares");
+
+        let path = env::var_os("DEP_CARES_ROOT")
+            .expect("DEP_CARES_ROOT not set, but we are building with c-ares.");
+        let path = PathBuf::from(path);
+        cfg.include(path.join("include"));
+    }
+
     if cfg!(feature = "ntlm") {
         cfg.file("curl/lib/curl_des.c")
             .file("curl/lib/curl_endian.c")
@@ -370,6 +382,11 @@ fn main() {
             cfg.file("curl/lib/vauth/spnego_sspi.c");
         }
     } else {
+        if !cfg!(feature = "cares") {
+            // This must be unset if we're building with c-ares
+            cfg.define("USE_THREADS_POSIX", None);
+        }
+
         cfg.define("RECV_TYPE_ARG1", "int")
             .define("HAVE_PTHREAD_H", None)
             .define("HAVE_ARPA_INET_H", None)
@@ -392,7 +409,6 @@ fn main() {
             .define("HAVE_SOCKETPAIR", None)
             .define("HAVE_STRUCT_TIMEVAL", None)
             .define("HAVE_SYS_UN_H", None)
-            .define("USE_THREADS_POSIX", None)
             .define("USE_UNIX_SOCKETS", None)
             .define("RECV_TYPE_ARG2", "void*")
             .define("RECV_TYPE_ARG3", "size_t")
