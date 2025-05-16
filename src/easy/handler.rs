@@ -1901,6 +1901,20 @@ impl<H> Easy2<H> {
     // =========================================================================
     // Connection Options
 
+    /// Installs a CURLOPT_OPENSOCKETFUNCTION handler.  Given the supplied socket type
+    /// and socket addr data, this function must return either a socket (fd), or
+    /// CURL_SOCKET_BAD.
+    pub fn open_socket_function(
+        &mut self,
+        f: unsafe extern "C" fn(
+            *mut std::ffi::c_void,
+            curl_sys::curlsocktype,
+            *mut curl_sys::curl_sockaddr,
+        ) -> curl_sys::curl_socket_t,
+    ) -> Result<(), Error> {
+        self.setopt_ptr(curl_sys::CURLOPT_OPENSOCKETFUNCTION, f as *const i8)
+    }
+
     /// Set maximum time the request is allowed to take.
     ///
     /// Normally, name lookups can take a considerable time and limiting
