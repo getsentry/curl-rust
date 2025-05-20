@@ -552,8 +552,10 @@ impl Easy {
             curl_sys::curlsocktype,
             *mut curl_sys::curl_sockaddr,
         ) -> curl_sys::curl_socket_t,
+        data: *mut std::ffi::c_void,
     ) -> Result<(), Error> {
-        self.inner.open_socket_function(f)
+        self.inner.open_socket_function(f)?;
+        self.inner.open_socket_data(data)
     }
 
     // =========================================================================
