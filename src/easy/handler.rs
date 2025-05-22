@@ -1915,6 +1915,12 @@ impl<H> Easy2<H> {
         self.setopt_ptr(curl_sys::CURLOPT_OPENSOCKETFUNCTION, f as *const i8)
     }
 
+    /// Sets the data that will be passed to the OPENSOCKETFUNCTION handler when it is
+    /// executed.  This must be a pointer, and will be unmutated by curl.
+    pub fn open_socket_data(&mut self, data: *mut std::ffi::c_void) -> Result<(), Error> {
+        self.setopt_ptr(curl_sys::CURLOPT_OPENSOCKETDATA, data as *const i8)
+    }
+
     /// Set maximum time the request is allowed to take.
     ///
     /// Normally, name lookups can take a considerable time and limiting
